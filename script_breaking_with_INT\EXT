@@ -1,0 +1,21 @@
+import re
+import docx
+from google.colab import files
+
+# Step 1: Upload your .docx file
+uploaded = files.upload()
+docx_path = next(iter(uploaded))
+
+
+def count_scene_splits(docx_path):
+    document = docx.Document(docx_path)
+    text = ' '.join([para.text for para in document.paragraphs])
+    pattern = r'\b(INT\.|EXT\.)\s*([^\n]*?)(?=\bINT\.|\bEXT\.|$)'
+    matches = re.finditer(pattern, text)
+    count = sum(1 for match in matches if match.group(2).strip())
+    return count
+
+
+# Step 2: Count splits and print the result
+number_of_splits = count_scene_splits(docx_path)
+print(f"Number of valid scene splits: {number_of_splits}")
