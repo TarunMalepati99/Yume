@@ -1,4 +1,4 @@
-# 🌙 Yume – AI-Powered Script-to-Storyboard Generator
+f# 🌙 Yume – AI-Powered Script-to-Storyboard Generator
 
 **Yume** is an AI-powered tool that transforms written scripts into **visual storyboards**. It automatically parses scenes, identifies characters, locations, and artifacts, and generates corresponding storyboard panels using **generative image models** — all while maintaining **visual consistency** across the story.
 
@@ -113,6 +113,5 @@ Contributions are welcome!
 Yume (夢) means *“dream”* in Japanese — this project aims to turn your **written dreams into visual stories**.
 
 ---
-
-Would you like me to make it **GitHub-ready with badges** (build, version, license, etc.) and add a **logo + sample screenshot section** for a more professional look?
+Data set: https://www.kaggle.com/code/burhanuddinlatsaheb/text-to-image-generation-stable-diffusion
 
