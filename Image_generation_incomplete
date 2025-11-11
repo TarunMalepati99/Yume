@@ -1,94 +1,20 @@
-pip install chromadb
+# yume_generator.py
+# ----------------------------------------------------
+# Yume: Memory + Prompt Fusion + Custom Image Generation Interface
+# ----------------------------------------------------
 
-
-# visual_memory.py
-# Yume: Memory System for Character and Setting Consistency
-
-from chromadb import Client
 from sentence_transformers import SentenceTransformer
+import numpy as np
+import os
 import uuid
 
-class VisualMemory:
-    """
-    A lightweight semantic memory for maintaining consistent
-    visual identity of characters, locations, and props.
-    """
-
-    def __init__(self, collection_name="yume_memory"):
-        self.client = Client()
-        self.encoder = SentenceTransformer("all-MiniLM-L6-v2")
-        self.collection = self.client.create_collection(collection_name)
-
-    def add(self, name: str, description: str):
-        """
-        Adds a memory entry (character, setting, or artifact).
-        """
-        vector = self.encoder.encode(description).tolist()
-        self.collection.add(
-            documents=[description],
-            embeddings=[vector],
-            ids=[name + "_" + str(uuid.uuid4())]
-        )
-        print(f"✅ Added memory for {name}: {description}")
-
-    def retrieve(self, text: str, top_k: int = 3):
-        """
-        Retrieves the top-k most relevant memories for a given scene or prompt.
-        """
-        vector = self.encoder.encode(text).tolist()
-        results = self.collection.query(query_embeddings=[vector], n_results=top_k)
-        return results["documents"][0]
-
-    def list(self):
-        """
-        Returns all stored memories.
-        """
-        return self.collection.get()["documents"]
-
-    def clear(self):
-        """
-        Clears the memory.
-        """
-        self.client.delete_collection(self.collection.name)
-        print("🧹 Memory cleared.")
-
 # ----------------------------------------------------
-# ✅ Test Example (Run this part to verify functionality)
-# ----------------------------------------------------
-if __name__ == "__main__":
-    memory = VisualMemory()
-
-    # Add characters
-    memory.add("Ram", "27-year-old man with curly hair, sunglasses, oversized black blazer, confident comedic posture.")
-    memory.add("Mona", "25-year-old woman in a royal blue dress with a playful and elegant aura.")
-    memory.add("Hotel Lobby", "Luxurious, modern hotel reception area with warm lighting and marble flooring.")
-
-    # Retrieve context for a new scene
-    context = memory.retrieve("Ram and Mona meet again in the hotel lobby at night.", top_k=3)
-    print("\n🧠 Retrieved Context:")
-    for item in context:
-        print("-", item)
-
-
-# yume_generator.py
-# End-to-end pipeline for Yume: memory + prompt fusion + image generation
-
-# ----------------------------------------------------
-# 1. IMPORTS
-# ----------------------------------------------------
-from sentence_transformers import SentenceTransformer
-from diffusers import StableDiffusionPipeline
-import numpy as np
-import torch
-import os
-
-# ----------------------------------------------------
-# 2. VISUAL MEMORY SYSTEM
+# 1. VISUAL MEMORY SYSTEM
 # ----------------------------------------------------
 class VisualMemory:
     """
     Lightweight semantic memory system for Yume —
-    stores and retrieves character and setting descriptions.
+    stores and retrieves character, setting, and object descriptions.
     """
 
     def __init__(self):
@@ -124,19 +50,18 @@ class VisualMemory:
 
 
 # ----------------------------------------------------
-# 3. PROMPT BUILDER
+# 2. PROMPT BUILDER
 # ----------------------------------------------------
 class PromptBuilder:
     """
-    Connects scene descriptions with memory context to build
-    consistent prompts for image generation.
+    Combines scene text with retrieved memory context
+    to maintain consistency across generations.
     """
 
     def __init__(self, memory: VisualMemory):
         self.memory = memory
 
     def build_prompt(self, scene_text: str):
-        # Retrieve context
         context = self.memory.retrieve(scene_text, top_k=3)
         memory_text = " ".join(context)
         prompt = f"{scene_text}. Maintain consistency with: {memory_text}"
@@ -144,31 +69,31 @@ class PromptBuilder:
 
 
 # ----------------------------------------------------
-# 4. IMAGE GENERATION (Stable Diffusion)
+# 3. IMAGE GENERATOR INTERFACE (CUSTOM MODEL PLACEHOLDER)
 # ----------------------------------------------------
-class ImageGenerator:
+class CustomImageGenerator:
     """
-    Handles image generation using Stable Diffusion (diffusers).
+    Placeholder for your custom image generation model.
+    Replace 'generate_image()' with your own model inference logic.
     """
 
-    def __init__(self, model_name="runwayml/stable-diffusion-v1-5", output_dir="storyboard_output"):
-        print("⏳ Loading model... this may take a moment.")
-        self.pipe = StableDiffusionPipeline.from_pretrained(model_name)
-        self.pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+    def __init__(self, model=None, output_dir="storyboard_output"):
+        self.model = model  # attach your own model instance later
         self.output_dir = output_dir
         os.makedirs(output_dir, exist_ok=True)
 
     def generate(self, prompt: str, filename: str):
-        print(f"🎨 Generating image for: {prompt[:60]}...")
-        image = self.pipe(prompt, num_inference_steps=30).images[0]
-        save_path = os.path.join(self.output_dir, filename)
-        image.save(save_path)
-        print(f"✅ Saved: {save_path}")
-        return save_path
+        print(f"🎨 [Mock] Generating image for: {prompt[:60]}...")
+        # Replace this block with your own model’s image generation call
+        fake_image_path = os.path.join(self.output_dir, filename)
+        with open(fake_image_path, "w") as f:
+            f.write(f"Generated image for: {prompt}")
+        print(f"✅ Saved placeholder: {fake_image_path}")
+        return fake_image_path
 
 
 # ----------------------------------------------------
-# 5. END-TO-END EXAMPLE
+# 4. END-TO-END EXAMPLE
 # ----------------------------------------------------
 if __name__ == "__main__":
     # Initialize systems
@@ -187,12 +112,12 @@ if __name__ == "__main__":
         "Ram and Mona talk as Gopal struggles with a suitcase near them."
     ]
 
-    # Initialize image generator
-    generator = ImageGenerator()
+    # Initialize image generator (custom)
+    generator = CustomImageGenerator()
 
     # Generate images for each scene
     for i, scene_text in enumerate(scenes, start=1):
         final_prompt = builder.build_prompt(scene_text)
         generator.generate(final_prompt, f"scene_{i}.png")
 
-    print("\n🌙 All scenes generated and saved in 'storyboard_output/' folder!")
+    print("\n🌙 All scenes processed and saved in 'storyboard_output/' folder!")
