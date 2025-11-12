@@ -1,0 +1,80 @@
+import re
+import spacy
+from pdfminer.high_level import extract_text
+from pprintpp import pprint
+from google.colab import files
+
+nlp = spacy.load("en_core_web_sm")
+
+def read_script(file_path):
+    if file_path.endswith(".pdf"):
+        return extract_text(file_path)
+    elif file_path.endswith(".txt"):
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.read()
+    else:
+        raise ValueError("Unsupported file type")
+
+def parse_script_adaptive(text):
+    """
+    Adaptive parser: separates scene headers, characters, dialogues, actions, props
+    """
+    # Split by INT./EXT. or uppercase lines ending with DAY/NIGHT
+    scene_header_pattern = re.compile(r'((?:INT|EXT)[^\n]*|[A-Z ]{3,} - (?:DAY|NIGHT))', re.IGNORECASE)
+    splits = scene_header_pattern.split(text)
+
+    scenes = []
+    i = 1
+    while i < len(splits):
+        header = splits[i].strip()
+        body = splits[i+1].strip() if i+1 < len(splits) else ""
+        scenes.append((header, body))
+        i += 2
+
+    parsed_scenes = []
+    for header, body in scenes:
+        lines = [line.strip() for line in body.split("\n") if line.strip()]
+
+        # 1️⃣ Characters detection: look for uppercase lines not containing common directives
+        potential_chars = [line for line in lines if line.isupper() and line not in ["CUT TO:", "FADE IN:", "FADE OUT:"]]
+        characters = list(set(potential_chars))
+
+        # 2️⃣ Dialogue detection: line following a character
+        dialogues = {char: [] for char in characters}
+        current_char = None
+        for line in lines:
+            if line in characters:
+                current_char = line
+            elif current_char:
+                dialogues[current_char].append(line)
+
+        # 3️⃣ Actions: lines that are neither headers nor dialogues
+        dialogue_lines = [d for l in dialogues.values() for d in l]
+        action_lines = [line for line in lines if line not in characters and line not in dialogue_lines]
+
+        # 4️⃣ Props: noun chunks in body excluding stop words
+        doc = nlp(body)
+        stop_props = {"INT", "EXT", "DAY", "NIGHT", "MORNING", "EVENING", "CONTINUOUS", "LATER", "CUT", "FADE"}
+        props = list(set([chunk.text for chunk in doc.noun_chunks if len(chunk.text.split()) <= 3 and chunk.text.upper() not in stop_props]))
+
+        parsed_scenes.append({
+            "scene_header": header,
+            "characters": characters,
+            "dialogues": dialogues,
+            "actions": action_lines,
+            "props": props
+        })
+
+    return parsed_scenes
+
+# ---------------------------
+# Upload & Parse
+# ---------------------------
+uploaded = files.upload()
+file_path = list(uploaded.keys())[0]
+
+script_text = read_script(file_path)
+scenes_data = parse_script_adaptive(script_text)
+
+# Preview first scene
+pprint(scenes_data[0])
