@@ -1,0 +1,197 @@
+
+
+# 🌙 **Yume – Full System Flowchart Explanation**
+
+Think of it as **eight major stages**, each feeding into the next.
+
+---
+
+## **1. START**
+
+The system initializes.
+
+* Load environment
+* Connect to models (NLP + Vision)
+* Load memory (characters, world, continuity rules)
+
+---
+
+## **2. WORLD & CHARACTER LOADING**
+
+User provides:
+
+* **World description**
+* **Character profiles**
+* **Visual styles**
+
+Yume stores these in:
+
+* **Global Context Memory**
+* **Character Visual Embeddings**
+* **Style Embeddings**
+
+➡️ Output passed to next stage: **context package**
+
+---
+
+## **3. SCRIPT INPUT**
+
+User uploads or pastes a script.
+
+This goes into:
+
+* **Text Preprocessor**
+
+  * Clean text
+  * Normalize format
+  * Identify INT./EXT., scene headings, etc.
+
+➡️ Output: **clean script text**
+
+---
+
+## **4. NLP SCENE PARSER**
+
+This is where the script breaks into usable parts.
+
+Parser pulls:
+
+* Scene heading
+* Location type (INT/EXT + place)
+* Time of day
+* Characters present (**character matching against memory**)
+* Actions (**verb extraction**) ← optional verb-list training
+* Objects/artifacts
+* Mood or tone (optional)
+
+➡️ Output:
+**Scene Object**
+
+```
+{
+  "location": "...",
+  "time": "...",
+  "characters": [...],
+  "actions": [...],
+  "artifacts": [...],
+  "mood": "..."
+}
+```
+
+---
+
+## **5. PROMPT GENERATOR**
+
+For every scene object, generate a **visual prompt**.
+
+Uses:
+
+* Scene data
+* Character memory (images, traits)
+* World rules
+* Style embeddings
+
+The prompt becomes something like:
+
+> “Wide shot, INT HOTEL LOBBY – Ram stands at the reception desk doing a mock-serious pose, …”
+
+System ensures:
+
+* Visual consistency
+* Pose/action mapping
+* Environment details
+* No adjectives user told to avoid (optional mode)
+
+➡️ Output: **Final Prompt**
+
+---
+
+## **6. STORYBOARD IMAGE GENERATOR**
+
+Takes the final prompt + character embeddings and produces:
+
+* Shot 1 image
+* Shot 2 image
+* Shot 3 image
+
+(or whatever number is needed)
+
+This stage handles:
+
+* Consistent characters
+* Same outfits
+* Same style
+* Same lighting across scenes
+
+➡️ Output: **Storyboard Panel Set**
+
+---
+
+## **7. CONTINUITY MEMORY UPDATE**
+
+Everything generated gets fed back into memory:
+
+* Character appearance refinements
+* New objects introduced
+* Scene-specific style corrections
+* Environment updates
+
+This improves:
+
+* Future scene consistency
+* Visual accuracy
+
+➡️ Output: memory is updated for next scene
+
+---
+
+## **8. FINAL OUTPUT**
+
+Yume displays:
+
+* Storyboard panels
+* Prompt for each scene
+* JSON of parsed scenes
+* Optionally PDF export
+
+---
+
+# **VISUAL LAYOUT (TEXT FLOWCHART)**
+
+```
+        ┌──────────┐
+        │  START   │
+        └────┬─────┘
+             ↓
+ ┌─────────────────────────┐
+ │ LOAD WORLD & CHARACTERS │
+ └───────────┬─────────────┘
+             ↓
+     ┌──────────────┐
+     │ SCRIPT INPUT  │
+     └──────┬────────┘
+            ↓
+ ┌──────────────────────────┐
+ │  NLP SCENE PARSER        │
+ │ (locations, chars, verbs │
+ │  artifacts, mood)        │
+ └───────────┬──────────────┘
+             ↓
+     ┌────────────────┐
+     │ PROMPT MAKER   │
+     │ (scene → text) │
+     └──────┬─────────┘
+            ↓
+ ┌──────────────────────────┐
+ │ STORYBOARD GENERATOR     │
+ │ (AI images, consistency) │
+ └──────────┬───────────────┘
+            ↓
+ ┌──────────────────────────┐
+ │ CONTINUITY MEMORY UPDATE │
+ └──────────┬───────────────┘
+            ↓
+     ┌─────────────┐
+     │ FINAL OUTPUT│
+     └─────────────┘
+
