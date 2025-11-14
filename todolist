@@ -1,0 +1,166 @@
+yume/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── setup.py
+├── .gitignore
+├── .github/
+│   ├── workflows/
+│   │   ├── tests.yml
+│   │   └── deploy.yml
+│   └── ISSUE_TEMPLATE.md
+│
+├───────────────────────────────────────────────
+│  CORE SYSTEM
+├───────────────────────────────────────────────
+│
+├── yume_core/
+│   ├── __init__.py
+│   ├── pipeline.py              # Full orchestration (NLP → prompt → image)
+│   ├── scene_manager.py
+│   ├── panel_manager.py
+│   ├── storyboard_builder.py
+│   ├── registry.py              # Loads world + characters
+│   └── config.py
+│
+├───────────────────────────────────────────────
+│  NLP PARSER
+├───────────────────────────────────────────────
+│
+├── yume_nlp_parser/
+│   ├── __init__.py
+│   ├── parser.py                # Calls all extractor modules
+│   ├── scene_splitter.py        # INT/EXT based scene detection
+│   ├── character_extractor.py
+│   ├── location_extractor.py
+│   ├── verb_extractor.py        # Using 7ESL list + POS tags
+│   ├── artifact_extractor.py
+│   ├── mood_extractor.py
+│   ├── dialogue_extractor.py
+│   └── utils/
+│       ├── text_cleaner.py
+│       ├── patterns.py
+│       └── verbs_list.json
+│
+├───────────────────────────────────────────────
+│  PROMPT GENERATOR
+├───────────────────────────────────────────────
+│
+├── yume_prompt_engine/
+│   ├── __init__.py
+│   ├── prompt_generator.py      # Main entry point
+│   ├── character_prompt.py
+│   ├── location_prompt.py
+│   ├── action_prompt.py
+│   ├── mood_prompt.py
+│   ├── style_presets.py
+│   ├── negative_prompt.py
+│   └── composition_rules.py     # Camera angles, framing
+│
+├───────────────────────────────────────────────
+│  IMAGE ENGINE
+├───────────────────────────────────────────────
+│
+├── yume_image_engine/
+│   ├── __init__.py
+│   ├── sd_engine.py             # Stable Diffusion wrapper
+│   ├── flux_engine.py           # Flux++/SD3 optional
+│   ├── controlnet_engine.py
+│   ├── ip_adapter.py            # Character consistency
+│   ├── upscaler.py
+│   ├── seed_manager.py
+│   └── models/
+│       ├── README.md
+│       └── (model checkpoints .gitignored)
+│
+├───────────────────────────────────────────────
+│  WORLD + CHARACTER DATA
+├───────────────────────────────────────────────
+│
+├── yume_world/
+│   ├── world.json
+│   ├── environments/
+│   │   ├── hotel_lobby.json
+│   │   ├── rooftop_night.json
+│   │   └── alley_dark.json
+│   ├── styles/
+│   │   ├── cinematic.json
+│   │   └── anime.json
+│   └── presets/
+│       └── lighting.json
+│
+├── yume_characters/
+│   ├── characters.json          # Names, roles, tags
+│   ├── profiles/
+│   │   ├── ram.json
+│   │   ├── gopal.json
+│   │   ├── varma.json
+│   │   └── mona.json
+│   ├── images_reference/
+│   │   ├── ram/
+│   │   ├── gopal/
+│   │   ├── varma/
+│   │   └── mona/
+│   ├── embeddings/
+│   │   └── (IP-Adapter loras)
+│   └── appearance_rules.py
+│
+├───────────────────────────────────────────────
+│  TRAINING DATA
+├───────────────────────────────────────────────
+│
+├── yume_training_data/
+│   ├── annotated_scenes/
+│   │   ├── dataset_01.json
+│   │   └── dataset_02.json
+│   ├── prompt_image_pairs/
+│   ├── verbs_dataset/
+│   ├── pdf_samples/
+│   │   ├── training_scene1.pdf
+│   │   ├── training_scene2.pdf
+│   │   └── training_scene3.pdf
+│   └── README.md
+│
+├───────────────────────────────────────────────
+│  UI / NOTEBOOK / DEMO
+├───────────────────────────────────────────────
+│
+├── yume_ui/
+│   ├── colab/
+│   │   ├── yume_colab.ipynb
+│   │   ├── sample_script.txt
+│   ├── streamlit_app/
+│   │   ├── app.py
+│   │   ├── pages/
+│   │   └── assets/
+│   └── gradio_app/
+│       └── interface.py
+│
+├───────────────────────────────────────────────
+│  UTILITIES & EXPORT
+├───────────────────────────────────────────────
+│
+├── yume_utils/
+│   ├── file_io.py
+│   ├── logger.py
+│   ├── seed.py
+│   ├── path_manager.py
+│   └── timer.py
+│
+├── yume_exporter/
+│   ├── pdf_exporter.py
+│   ├── comic_strip_exporter.py
+│   ├── json_exporter.py
+│   └── video_exporter.py
+│
+└───────────────────────────────────────────────
+   TESTS
+────────────────────────────────────────────────
+│
+└── tests/
+    ├── test_parser.py
+    ├── test_prompt_engine.py
+    ├── test_image_engine.py
+    ├── test_world_loader.py
+    └── test_pipeline.py
