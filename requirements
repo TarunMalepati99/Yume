@@ -1,0 +1,76 @@
+# ======================
+# CORE PYTHON UTILS
+# ======================
+numpy
+pandas
+tqdm
+Pillow
+regex
+python-dotenv
+
+# ======================
+# NLP / TEXT PROCESSING
+# ======================
+spacy
+spacy-transformers
+nltk
+sentencepiece
+transformers
+accelerate
+
+# ======================
+# ML / DIFFUSION MODELS
+# ======================
+torch
+torchvision
+torchaudio
+diffusers
+xformers
+compel
+opencv-python
+onnxruntime
+einops
+safetensors
+mediapipe
+
+# ======================
+# CONTROLNET / IP-ADAPTER
+# ======================
+controlnet-aux
+insightface
+basicsr
+facexlib
+
+# ======================
+# IMAGE ENHANCEMENT
+# ======================
+realesrgan
+gfpgan
+
+# ======================
+# WEB UI / APPS
+# ======================
+streamlit
+gradio
+
+# ======================
+# EXPORT / PDF / VIDEO
+# ======================
+reportlab
+fpdf
+moviepy
+
+# ======================
+# DATA / FILE HELPERS
+# ======================
+PyYAML
+python-multipart
+requests
+aiohttp
+
+# ======================
+# TESTING / DEV
+# ======================
+pytest
+black
+flake8
