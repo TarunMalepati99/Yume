@@ -1,1 +1,94 @@
+import os
+from dataclasses import dataclass
+from typing import Optional, Callable, List, Tuple
+
+from PIL import Image
+from torch.utils.data import Dataset
+
+
+@dataclass
+class PromptImagePair:
+    """A container holding a natural-language prompt and its corresponding image."""
+    prompt: str
+    image_path: str
+
+
+class PromptImagePairDataset(Dataset):
+    """
+    Dataset loader for training models using (prompt, image) pairs.
+
+    Expected directory structure:
+    root/
+        sample1.txt
+        sample1.jpg  (or .png / .webp)
+        sample2.txt
+        sample2.png
+        ...
+
+    Each .txt contains the prompt string.
+    The image file shares the same base name.
+    """
+
+    IMG_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+
+    def __init__(
+        self,
+        root: str,
+        transform: Optional[Callable] = None,
+        tokenizer: Optional[Callable] = None,
+    ):
+        """
+        Arguments:
+            root (str): Folder containing prompt-image pairs.
+            transform (callable): Image transformations (e.g., ToTensor()).
+            tokenizer (callable): Optional prompt tokenizer (HF tokenizer, etc.)
+        """
+        self.root = root
+        self.transform = transform
+        self.tokenizer = tokenizer
+
+        if not os.path.exists(root):
+            raise FileNotFoundError(f"Directory not found: {root}")
+
+        self.pairs: List[PromptImagePair] = self._load_pairs()
+
+        if len(self.pairs) == 0:
+            raise RuntimeError("No valid prompt-image pairs found in directory.")
+
+    def _load_pairs(self) -> List[PromptImagePair]:
+        pairs = []
+
+        for filename in os.listdir(self.root):
+            if filename.lower().endswith(".txt"):
+                base = filename[:-4]  # remove .txt
+                txt_path = os.path.join(self.root, filename)
+
+                # Find the corresponding image
+                for ext in self.IMG_EXTENSIONS:
+                    img_path = os.path.join(self.root, base + ext)
+                    if os.path.exists(img_path):
+                        with open(txt_path, "r", encoding="utf-8") as f:
+                            prompt = f.read().strip()
+                        pairs.append(PromptImagePair(prompt=prompt, image_path=img_path))
+                        break
+
+        return pairs
+
+    def __len__(self):
+        return len(self.pairs)
+
+    def __getitem__(self, idx: int) -> Tuple[str, Image.Image]:
+        pair = self.pairs[idx]
+
+        # Load prompt
+        prompt = pair.prompt
+        if self.tokenizer:
+            prompt = self.tokenizer(prompt)
+
+        # Load image
+        image = Image.open(pair.image_path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+
+        return prompt, image
 
